@@ -1,130 +1,116 @@
-/********************************************
- * @file   2048.h
- * @brief  2048 game
-
- *******************************************/
-
 #include "stdio.h"
 #include "rand.h"
 
-int numbers2048[4][4] = { { } }; // The two dimentional array to store the numbers
+int numbers2048[4][4] = { { } }; // 4*4游戏盘
 int tempUnit2048[4] = {}; // For function move()
-unsigned score2048 = 0;
-int validity2048 = 0; // The validity of the user's move(0 represent invalidity and 1 represent validity)
-char option2048[2] = ""; // The option of the user
-int stop=0;
+unsigned score2048 = 0;//计分
+int validity2048 = 0; // 玩家移动是否合法0不合法1合法
+char option2048[2] = ""; // 玩家选择的方向
 
-void initData(void);
-void morge2048(void);
-void printNums2048(void);
-int isAlive2048(void);
-int canEliminate2048(void);
-int zeroNum2048(void);
-void addrandom2048(void);
+void initData(void);//将游戏盘全部置0
+void morge2048(void);//检测移动方向遍历棋盘
+void printNums2048(void);//打印游戏当前的状态
+int isAlive2048(void);//确认玩家是否仍存活
+int canEliminate2048(void);//检查游戏状态
+int zeroNum2048(void);//检查空位数
+void addrandom2048(void);//在随机位置加入2
 void move2048(void);
 void merge2048(void);
 
 PUBLIC void start2048Game(int fd_stdin, int fd_stdout) {
-    // Specify the rules of the game
-    printf("By DerekDick\n");
     printf("Welcome to 2048 Game!\n");
-    printf("Press w/a/s/d and enter key to move the blocks,if you want to stop the game,press 't'\n");
+    printf("Use w/a/s/d and enter key to move the blocks.\n");
     printf("For example, if you want to move left, just press \"a\" and the enter key.\n");
 
-    // Initialize the data
+    // 初始化数据将棋盘置0
     initData();
 
-    // Initalization
+    //加入两个随机数
     addrandom2048();
     addrandom2048();
     printNums2048();
 
-    // Turns in loops
+    //定时检查游戏状态
     // while (scanf(" %c", &option)) {
-    while (read(fd_stdin, option2048, 2)&&stop==0) {
-        // Check if the player is dead
+    while (read(fd_stdin, option2048, 2)) {
         if (!isAlive2048()) {
             printf("You lose!!!\a\n");
             break;
         }
 
-        morge2048();
+        morge2048();//检测玩家的移动方式
         if (validity2048) {
-            addrandom2048();
+            addrandom2048();//随机位置加入2
         }
         validity2048 = 0;
         
-        printNums2048();
+        printNums2048();//重新输出当前游戏状态
     }
 }
 
 void morge2048(void) {
     /* Morges(moves and merges) the number blocks */
-    
     switch (option2048[0]) {
-    case 'w':
+    case 'w'://上
         for (int j = 0; j <= 3; j++) {
             for (int i = 0, k = 0; i <= 3; i++) {
-                tempUnit2048[k++] = numbers2048[i][j];
+                tempUnit2048[k++] = numbers2048[i][j];//从第一列第一个数开始按列处理
             }
 
-            move2048();
-            merge2048();
-            move2048();
+            move2048();//是否可以移动
+            merge2048();//是否可以合并
+            move2048();//是否可以移动
 
             for (int i = 0, k = 0; i <= 3; i++) {
-                numbers2048[i][j] = tempUnit2048[k++];
+                numbers2048[i][j] = tempUnit2048[k++];//刷新数据
             }
         }
         break;
-    case 'a':
+    case 'a'://左
         for (int i = 0; i <= 3; i++) {
             for (int j = 0, k = 0; j <= 3; j++) {
-                tempUnit2048[k++] = numbers2048[i][j];
+                tempUnit2048[k++] = numbers2048[i][j];//从第一行第一个数开始按行处理
             }
 
-            move2048();
-            merge2048();
-            move2048();
+            move2048();//是否可以移动
+            merge2048();//是否可以合并
+            move2048();//是否可以移动
 
             for (int j = 0, k = 0; j <= 3; j++) {
-                numbers2048[i][j] = tempUnit2048[k++];
+                numbers2048[i][j] = tempUnit2048[k++];//刷新数据
             }
         }
         break;
-    case 's':
+    case 's'://下
         for (int j = 0; j <= 3; j++) {
             for (int i = 3, k = 0; i >= 0; i--) {
-                tempUnit2048[k++] = numbers2048[i][j];
+                tempUnit2048[k++] = numbers2048[i][j];//从第一列的最后一个数按列处理
             }
 
-            move2048();
-            merge2048();
-            move2048();
+            move2048();//是否可以移动
+            merge2048();//是否可以合并
+            move2048();//是否可以移动
 
             for (int i = 3, k = 0; i >= 0; i--) {
-                numbers2048[i][j] = tempUnit2048[k++];
+                numbers2048[i][j] = tempUnit2048[k++];//刷新数据
             }
         }
         break;
-    case 'd':
+    case 'd'://右
         for (int i = 0; i <= 3; i++) {
             for (int j = 3, k = 0; j >= 0; j--) {
-                tempUnit2048[k++] = numbers2048[i][j];
+                tempUnit2048[k++] = numbers2048[i][j];//从第一行最后一个数按行处理
             }
 
-            move2048();
-            merge2048();
-            move2048();
+            move2048();//是否可以移动
+            merge2048();//是否可以合并
+            move2048();//是否可以移动
 
             for (int j = 3, k = 0; j >= 0; j--) {
-                numbers2048[i][j] = tempUnit2048[k++];
+                numbers2048[i][j] = tempUnit2048[k++];//刷新数据
             }
         }
         break;
-case 't':
-stop=1;
-break;
     default:
         printf("Illegal input!!!\a\n");
     }
@@ -132,8 +118,7 @@ break;
 }
 
 void printNums2048(void) {
-    /* Prints out the blocks of numbers */
-    
+//打印得分及游戏盘上当前的状态
     int i, j;
     for (i = 0; i <= 3; i++) {
         for (j = 0; j <= 3; j++) {
@@ -152,12 +137,11 @@ void printNums2048(void) {
 }
 
 int isAlive2048(void) {
-    /* Checks if the player is still alive */
-    
-    if (zeroNum2048()) {
+//确认玩家状态
+    if (zeroNum2048()) {//是否还有空位
         return 1;
     }
-    else if (canEliminate2048()) {
+    else if (canEliminate2048()) {//是否还有可消除的
         return 1;
     }
     else
@@ -165,8 +149,7 @@ int isAlive2048(void) {
 }
 
 int canEliminate2048(void) {
-    /* Checks if the number blocks(BLOCLED!!!) can be eliminated */
-    
+//确认游戏是否还可以进行，当棋盘满且不存在相邻两个相等时淘汰  
     // Rows
     for (int i = 0; i <= 3; i++) {
         for (int j = 0; j <= 2; j++) {
@@ -187,8 +170,7 @@ int canEliminate2048(void) {
 }
 
 int zeroNum2048(void) {
-    /* Counts the number of zeroes in the number block */
-    
+//确认棋盘是否已满
     int count = 0;
     for (int i = 0; i <= 3; i++) {
         for (int j = 0; j <= 3; j++) {
@@ -200,10 +182,8 @@ int zeroNum2048(void) {
 }
 
 void addrandom2048(void) {
-    /* This function is used to add one 2 into a random empty place */
-    
-    // The random seed
-    // srand2048(int(time(0)));
+//在随机的空位置加入2
+//随机一个索引值，用随机数除以空位数得到一个余数，那么一定可以找到一个随机的空位
     srand2048(1234);
     
     int index = rand2048() % zeroNum2048();
@@ -226,7 +206,7 @@ void addrandom2048(void) {
 void move2048(void) {
     int current = -1, count = 0;
     
-    // Positioning the first zero in this unit
+    //找到这一列/行的第一个空位
     for (int i = 0; i <= 2; i++) {
         if (tempUnit2048[i] == 0) {
             current = i;
@@ -234,12 +214,12 @@ void move2048(void) {
         }
     }
 
-    // No zeroes in this unit
+    //这一列/行没有空位，不能移动
     if (current == -1) {
         return;
     }
 
-    // Move the zero(es) back
+   //将数字都尽量聚集在一起
     for (; current <= 2; ) {
         if (tempUnit2048[current + 1] == 0) {
             count++;
@@ -259,7 +239,7 @@ void move2048(void) {
 
 void merge2048(void) {
     for (int i = 0; i <= 2; i++) {
-        if (tempUnit2048[i] != 0) {
+        if (tempUnit2048[i] != 0) {//如果存在两个相等的就合并，把后一个置为0
             if (tempUnit2048[i + 1] == tempUnit2048[i]) {
                 validity2048 = 1;
                 tempUnit2048[i] = tempUnit2048[i + 1] + tempUnit2048[i];
@@ -275,9 +255,7 @@ void merge2048(void) {
     return;
 }
 
-/**
- * Initializes the data
- */
+//初始化数据，全部置0
 void initData(void) {
     int row = 0, column = 0;
     
